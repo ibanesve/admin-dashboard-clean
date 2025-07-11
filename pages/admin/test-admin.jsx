@@ -1,5 +1,4 @@
-import AddLocationForm from "../../components/AddLocationForm";
-
+import AddLocationForm from "@/components/AddLocationForm";
 
 export default function AdminPage() {
   return (
