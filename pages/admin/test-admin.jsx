@@ -1,5 +1,4 @@
-"use client";
-import AddLocationForm from "@/components/AddLocationForm";
+import AddLocationForm from "../components/AddLocationForm";
 
 export default function TestAdminPage() {
   return (
