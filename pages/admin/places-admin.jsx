@@ -40,14 +40,14 @@ export default function AdminLocations() {
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `locations/${fileName}`;
 
-    let { error } = await supabase.storage.from('images').upload(filePath, file);
+    let { error } = await supabase.storage.from('places-images').upload(filePath, file);
 
     if (error) {
       console.error('Image upload error:', error);
       return null;
     }
 
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
+    const { data: { publicUrl } } = supabase.storage.from('places-images').getPublicUrl(filePath);
     return publicUrl;
   };
 
