@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 
 export default function AdminLocations() {
-  const [locations, setLocations] = useState([]);
+  const [places, setPlaces] = useState([]);
   const [form, setForm] = useState({
     name: '',
     category: '',
@@ -14,16 +14,17 @@ export default function AdminLocations() {
   });
 
   useEffect(() => {
-    fetchLocations();
+    fetchPlaces();
   }, []);
 
-  const fetchLocations = async () => {
+  const fetchPlaces = async () => {
     const { data, error } = await supabase
       .from('places')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error) setLocations(data || []);
+    if (!error) setPlaces(data || []);
+    else console.error('Error fetching places:', error);
   };
 
   const handleChange = (e) => {
@@ -51,7 +52,7 @@ export default function AdminLocations() {
     return publicUrl;
   };
 
-  const addLocation = async () => {
+  const addPlace = async () => {
     let imageUrl = null;
     if (form.imageFile) {
       imageUrl = await uploadImage(form.imageFile);
@@ -80,21 +81,27 @@ export default function AdminLocations() {
         state: '',
         imageFile: null
       });
-      fetchLocations();
+      fetchPlaces();
+    } else {
+      console.error('Insert error:', error);
     }
   };
 
   const toggleField = async (id, field, currentValue) => {
-    await supabase.from('places').update({ [field]: !currentValue }).eq('id', id);
-    fetchLocations();
+    const { error } = await supabase
+      .from('places')
+      .update({ [field]: !currentValue })
+      .eq('id', id);
+    if (error) console.error('Toggle error:', error);
+    else fetchPlaces();
   };
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Admin: Manage Locations</h1>
+      <h1 className="text-2xl font-bold mb-4">Admin: Manage Places</h1>
 
       <div className="mb-6 space-y-2">
-        <h2 className="text-lg font-semibold">➕ Add New Location</h2>
+        <h2 className="text-lg font-semibold">➕ Add New Place</h2>
         <input className="border p-2 w-full" placeholder="Name" name="name" value={form.name} onChange={handleChange} />
         <input className="border p-2 w-full" placeholder="Category" name="category" value={form.category} onChange={handleChange} />
         <input className="border p-2 w-full" placeholder="Description (English)" name="description" value={form.description} onChange={handleChange} />
@@ -102,7 +109,7 @@ export default function AdminLocations() {
         <input className="border p-2 w-full" placeholder="Coordinates [lat, lng]" name="coordinates" value={form.coordinates} onChange={handleChange} />
         <input className="border p-2 w-full" placeholder="State" name="state" value={form.state} onChange={handleChange} />
         <input type="file" name="imageFile" accept="image/*" onChange={handleChange} />
-        <button onClick={addLocation} className="bg-green-600 text-white px-4 py-2 rounded mt-2">Add</button>
+        <button onClick={addPlace} className="bg-green-600 text-white px-4 py-2 rounded mt-2">Add</button>
       </div>
 
       <table className="w-full border-collapse text-sm">
@@ -117,19 +124,19 @@ export default function AdminLocations() {
           </tr>
         </thead>
         <tbody>
-          {locations.map((loc) => (
-            <tr key={loc.id}>
-              <td className="border p-2">{loc.name}</td>
-              <td className="border p-2">{loc.category}</td>
-              <td className="border p-2 text-center">{loc.approved ? '✅' : '❌'}</td>
-              <td className="border p-2 text-center">{loc.featured ? '⭐' : '—'}</td>
-              <td className="border p-2">{loc.image_url ? <img src={loc.image_url} alt="" className="w-16 h-10 object-cover" /> : '—'}</td>
+          {places.map((place) => (
+            <tr key={place.id}>
+              <td className="border p-2">{place.name}</td>
+              <td className="border p-2">{place.category}</td>
+              <td className="border p-2 text-center">{place.approved ? '✅' : '❌'}</td>
+              <td className="border p-2 text-center">{place.featured ? '⭐' : '—'}</td>
+              <td className="border p-2">{place.image_url ? <img src={place.image_url} alt="" className="w-16 h-10 object-cover" /> : '—'}</td>
               <td className="border p-2 space-x-2">
-                <button onClick={() => toggleField(loc.id, 'approved', loc.approved)} className="bg-blue-500 text-white px-2 py-1 rounded">
-                  {loc.approved ? 'Unapprove' : 'Approve'}
+                <button onClick={() => toggleField(place.id, 'approved', place.approved)} className="bg-blue-500 text-white px-2 py-1 rounded">
+                  {place.approved ? 'Unapprove' : 'Approve'}
                 </button>
-                <button onClick={() => toggleField(loc.id, 'featured', loc.featured)} className="bg-yellow-500 text-black px-2 py-1 rounded">
-                  {loc.featured ? 'Unfeature' : 'Feature'}
+                <button onClick={() => toggleField(place.id, 'featured', place.featured)} className="bg-yellow-500 text-black px-2 py-1 rounded">
+                  {place.featured ? 'Unfeature' : 'Feature'}
                 </button>
               </td>
             </tr>
